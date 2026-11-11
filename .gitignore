@@ -1,0 +1,8 @@
+# Development & test files
+scratch/
+UDBHAV-2K26/
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+.DS_Store
