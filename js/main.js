@@ -69,7 +69,7 @@
   const prevCountdown = { d: null, h: null, m: null, s: null };
 
   // ---------------------------------------------------------------------------
-  // 2. Background Music Controller (Coldplay — A Sky Full of Stars)
+  // 2. Background Music Controller
   // ---------------------------------------------------------------------------
   const BackgroundMusic = (() => {
     let audioElement = null;
@@ -128,13 +128,13 @@
       if (isPlaying) {
         toggleBtn.classList.add('is-playing');
         toggleBtn.setAttribute('aria-pressed', 'true');
-        toggleBtn.setAttribute('aria-label', 'Pause background music: Coldplay - A Sky Full of Stars');
-        toggleBtn.setAttribute('title', 'Pause Coldplay — A Sky Full of Stars');
+        toggleBtn.setAttribute('aria-label', 'Pause background music');
+        toggleBtn.setAttribute('title', 'Pause background music');
       } else {
         toggleBtn.classList.remove('is-playing');
         toggleBtn.setAttribute('aria-pressed', 'false');
-        toggleBtn.setAttribute('aria-label', 'Play background music: Coldplay - A Sky Full of Stars');
-        toggleBtn.setAttribute('title', 'Play Coldplay — A Sky Full of Stars');
+        toggleBtn.setAttribute('aria-label', 'Play background music');
+        toggleBtn.setAttribute('title', 'Play background music');
       }
     }
 
@@ -156,7 +156,7 @@
               hasUserPaused = false;
               updateUI();
               if (!isAutoTrigger) {
-                showToast('Playing: Coldplay — A Sky Full of Stars ✦');
+                showToast('Background music playing ✦');
               }
             })
             .catch((err) => {
@@ -165,7 +165,7 @@
               if (err.name === 'NotAllowedError') {
                 console.log('Background music waiting for direct user gesture.');
               } else if (!isAutoTrigger) {
-                showToast('Audio file not found: Place coldplay-sky-full-of-stars.mp3 in /audio');
+                showToast('Audio file not found: Place background-music.mp3 in /audio');
                 console.warn('Background music playback blocked or missing file:', err.message);
               }
             });
@@ -174,7 +174,7 @@
         isPlaying = false;
         updateUI();
         if (!isAutoTrigger) {
-          showToast('Audio file not found: Place coldplay-sky-full-of-stars.mp3 in /audio');
+          showToast('Audio file not found: Place background-music.mp3 in /audio');
         }
       }
     }
@@ -390,6 +390,7 @@
     if (DOM.enterButton) {
       DOM.enterButton.addEventListener('click', () => {
         BackgroundMusic.play(false);
+        EnvelopeSFX.ensureContext(); // Pre-warm AudioContext on first user gesture
         closeIntro(true);
       });
     }
@@ -490,7 +491,7 @@
 
     if (DOM.countdownMessage) {
       if (d === 0) {
-        DOM.countdownMessage.textContent = 'Today is the day! See you at 12:00 PM in Seminar Hall!';
+        DOM.countdownMessage.textContent = 'Today is the day! See you at 12:00 PM in MCA Seminar Hall!';
       } else if (d === 1) {
         DOM.countdownMessage.textContent = 'Only 1 day left! Get ready for an electrifying celebration!';
       } else {
@@ -682,7 +683,7 @@
       'DTEND:20261114T113000Z',
       'SUMMARY:UDBHAV 2K26 — Freshers Party',
       'DESCRIPTION:Official Freshers Party welcoming new juniors to JSS Shri Manjunatheshwara MCA Institute. Music\\, cultural performances\\, fun games\\, and memorable celebrations.',
-      'LOCATION:Seminar Hall\\, JSS Shri Manjunatheshwara MCA Institute\\, Vidyagiri\\, Dharwad\\, Karnataka 580004',
+      'LOCATION:MCA Seminar Hall\\, JSS Shri Manjunatheshwara MCA Institute\\, Vidyagiri\\, Dharwad\\, Karnataka 580004',
       'STATUS:CONFIRMED',
       'CLASS:PUBLIC',
       'END:VEVENT',
@@ -711,7 +712,7 @@
   // ---------------------------------------------------------------------------
   // 11. Social Sharing System
   // ---------------------------------------------------------------------------
-  const INVITE_TEXT = 'You’re cordially invited to UDBHAV 2K26 – Freshers Party! Saturday, 14 November 2026 at 12:00 PM IST in Seminar Hall, JSS Shri Manjunatheshwara MCA Institute, Vidyagiri, Dharwad.';
+  const INVITE_TEXT = 'You’re cordially invited to UDBHAV 2K26 – Freshers Party! Saturday, 14 November 2026 at 12:00 PM IST in MCA Seminar Hall, JSS Shri Manjunatheshwara MCA Institute, Vidyagiri, Dharwad.';
 
   function shareInvitation() {
     const shareData = {
@@ -794,7 +795,157 @@
   }
 
   // ---------------------------------------------------------------------------
-  // 12. Cinematic Interactive Envelope & Wax Seal Opening Experience
+  // 12a. Envelope Sound Effects — Independent Web Audio API Channel
+  // ---------------------------------------------------------------------------
+  // Completely separate from BackgroundMusic. Never touches the <audio> element.
+  // Uses its own AudioContext, gain nodes, and synthesized oscillator tones.
+  const EnvelopeSFX = (() => {
+    let ctx = null;
+    let masterGain = null;
+    let isSequencePlaying = false;
+    let enabled = true;
+
+    function ensureContext() {
+      if (ctx && ctx.state !== 'closed') {
+        if (ctx.state === 'suspended') {
+          ctx.resume().catch(() => {});
+        }
+        return true;
+      }
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return false;
+        ctx = new AC();
+        masterGain = ctx.createGain();
+        masterGain.gain.value = 0.18; // Significantly quieter than music
+        masterGain.connect(ctx.destination);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    // Synthesize a short noise burst filtered through a bandpass (wax-seal click)
+    function playSealClick(when) {
+      if (!ctx || !masterGain) return;
+      const duration = 0.08;
+      const bufferSize = Math.floor(ctx.sampleRate * duration);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        const t = i / ctx.sampleRate;
+        const env = Math.exp(-t * 60);
+        data[i] = (Math.random() * 2 - 1) * env;
+      }
+
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 2200;
+      bp.Q.value = 1.5;
+
+      const gain = ctx.createGain();
+      gain.gain.value = 0.7;
+
+      src.connect(bp);
+      bp.connect(gain);
+      gain.connect(masterGain);
+      src.start(when);
+    }
+
+    // Synthesize a gentle paper-rustle noise (filtered pink-ish noise with slow envelope)
+    function playPaperRustle(when) {
+      if (!ctx || !masterGain) return;
+      const duration = 0.35;
+      const bufferSize = Math.floor(ctx.sampleRate * duration);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      let b0 = 0, b1 = 0, b2 = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.99765 * b0 + white * 0.0990460;
+        b1 = 0.96300 * b1 + white * 0.2965164;
+        b2 = 0.57000 * b2 + white * 1.0526913;
+        const pink = (b0 + b1 + b2 + white * 0.1848) * 0.11;
+        const t = i / ctx.sampleRate;
+        const env = Math.sin(Math.PI * t / duration) * 0.6;
+        data[i] = pink * env;
+      }
+
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 3000;
+      lp.Q.value = 0.5;
+
+      const gain = ctx.createGain();
+      gain.gain.value = 0.4;
+
+      src.connect(lp);
+      lp.connect(gain);
+      gain.connect(masterGain);
+      src.start(when);
+    }
+
+    // Synthesize a delicate golden chime (two sine oscillators with fast decay)
+    function playChime(when) {
+      if (!ctx || !masterGain) return;
+      const freqs = [1318.5, 1975]; // E6 and B6 — bright, bell-like
+      freqs.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+
+        const gain = ctx.createGain();
+        const t = when;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(idx === 0 ? 0.35 : 0.2, t + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+
+        osc.connect(gain);
+        gain.connect(masterGain);
+        osc.start(t + idx * 0.08);
+        osc.stop(t + 0.7);
+      });
+    }
+
+    // Play the full opening sequence, synchronized with animation timings
+    function playOpenSequence() {
+      if (!enabled) return;
+      if (isSequencePlaying) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if (!ensureContext()) return;
+
+      isSequencePlaying = true;
+      const now = ctx.currentTime;
+
+      playSealClick(now);                // Immediate: wax seal press
+      playPaperRustle(now + 0.15);       // 150ms: envelope flap opens
+      playChime(now + 0.40);             // 400ms: letter revealed
+
+      // Reset lock after the sequence finishes (~0.9s total)
+      setTimeout(() => {
+        isSequencePlaying = false;
+      }, 1100);
+    }
+
+    function setEnabled(val) {
+      enabled = !!val;
+    }
+
+    return {
+      playOpenSequence,
+      setEnabled,
+      ensureContext
+    };
+  })();
+
+  // ---------------------------------------------------------------------------
+  // 12b. Cinematic Interactive Envelope & Wax Seal Opening Experience
   // ---------------------------------------------------------------------------
   let isEnvelopeAnimating = false;
 
@@ -843,6 +994,11 @@
     const shouldOpen = open !== undefined ? open : !isCurrentlyExpanded;
 
     if (shouldOpen) {
+      // Play envelope sound effects (independent Web Audio API channel)
+      if (!silent) {
+        EnvelopeSFX.playOpenSequence();
+      }
+
       btn.classList.add('is-pressing');
       setTimeout(() => {
         btn.classList.remove('is-pressing');

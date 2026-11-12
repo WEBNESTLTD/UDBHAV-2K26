@@ -42,7 +42,7 @@ Built with love and devotion by the MCA seniors of **JSS Shri Manjunatheshwara M
    - Perforated gold admission ticket with unique Pass ID (`UDBHAV-2K26-JSS-MCA`).
    - One-click **Google Calendar** integration with pre-filled event time, location, and details.
    - Universal **Apple / iCal (.ics)** downloadable calendar file.
-   - Direct **Google Maps** link for navigation to Seminar Hall, Vidyagiri, Dharwad.
+   - Direct **Google Maps** link for navigation to MCA Seminar Hall, Vidyagiri, Dharwad.
 
 8. **Museum-Framed Poster Gallery & Lightbox**:
    - Authentic 1440 × 1920 high-resolution event poster framed with beveled passe-partout matting.
@@ -57,11 +57,11 @@ Built with love and devotion by the MCA seniors of **JSS Shri Manjunatheshwara M
     - Hallmark emblem with ancient Vedic blessing: *“Tamaso Ma Jyotirgamaya · Lead us from darkness unto light”*.
     - Moving invitation pledge: *“Here begins your story. Welcome to the family of JSS MCA Dharwad.”*
 
-11. **Background Music Experience (Coldplay — A Sky Full of Stars)**:
+11. **Background Music Experience**:
     - Minimalist music control in navigation bar with gentle animated soundwave equalizer during playback.
-    - User-initiated playback: plays on explicit toggle click or when unsealing the invitation letter.
+    - User-initiated playback: plays on explicit toggle click or when entering the celebration.
     - Zero autoplay on page load; seamless looping, graceful missing-file handling without JavaScript errors.
-    - Audio file location: `audio/coldplay-sky-full-of-stars.mp3` (or `audio/background-music.mp3`).
+    - Audio file location: `audio/background-music.mp3`.
 
 ---
 
@@ -80,8 +80,8 @@ Built with love and devotion by the MCA seniors of **JSS Shri Manjunatheshwara M
 
 ```text
 UDBHAV-2K26/
-├── audio/                   # Directory for legally obtained background music asset
-│   └── coldplay-sky-full-of-stars.mp3 # Coldplay — A Sky Full of Stars (place legal MP3 here)
+├── audio/                   # Directory for celebration background music asset
+│   └── background-music.mp3 # Celebration background music asset
 ├── css/
 │   └── style.css            # Modular, responsive stylesheet with CSS custom properties
 ├── images/
@@ -125,6 +125,6 @@ npx serve .
 ## ✦ Compliance & Specifications
 
 - **Event Date**: 14 November 2026, 12:00 PM IST (Saturday)
-- **Venue**: Seminar Hall, JSS Shri Manjunatheshwara MCA Institute, Vidyagiri, Dharwad, Karnataka 580004
+- **Venue**: MCA Seminar Hall, JSS Shri Manjunatheshwara MCA Institute, Vidyagiri, Dharwad, Karnataka 580004
 - **RSVP**: Intentionally omitted (no registration forms required)
 - **Frameworks**: Pure Vanilla HTML5, CSS3 & ES6+ JavaScript (zero external runtime dependencies)
