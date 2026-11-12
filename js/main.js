@@ -25,6 +25,8 @@
     menuToggle: document.getElementById('menuToggle'),
     navLinks: document.querySelectorAll('.nav-link'),
     themeToggle: document.getElementById('themeToggle'),
+    musicToggle: document.getElementById('musicToggle'),
+    bgMusic: document.getElementById('bgMusic'),
     metaThemeColor: document.getElementById('metaThemeColor'),
     days: document.getElementById('days'),
     hours: document.getElementById('hours'),
@@ -67,10 +69,152 @@
   const prevCountdown = { d: null, h: null, m: null, s: null };
 
   // ---------------------------------------------------------------------------
-  // 2. Audio Architecture (Reserved for Future Implementation)
+  // 2. Background Music Controller (Coldplay — A Sky Full of Stars)
   // ---------------------------------------------------------------------------
-  // Clean placeholder: background music and sound effects will be integrated here
-  // when audio assets are provided, without requiring website redesign.
+  const BackgroundMusic = (() => {
+    let audioElement = null;
+    let toggleBtn = null;
+    let isPlaying = false;
+    let hasUserPaused = false;
+
+    function init() {
+      audioElement = DOM.bgMusic || document.getElementById('bgMusic');
+      toggleBtn = DOM.musicToggle || document.getElementById('musicToggle');
+
+      if (!audioElement || !toggleBtn) return;
+
+      audioElement.loop = true;
+      audioElement.volume = 0.85;
+
+      audioElement.addEventListener('play', () => {
+        isPlaying = true;
+        updateUI();
+      });
+
+      audioElement.addEventListener('pause', () => {
+        isPlaying = false;
+        updateUI();
+      });
+
+      audioElement.addEventListener('ended', () => {
+        try {
+          audioElement.currentTime = 0;
+          audioElement.play().catch(() => {});
+        } catch (_) {}
+      });
+
+      audioElement.addEventListener('error', () => {
+        console.warn('Background music audio source error or missing file.');
+        isPlaying = false;
+        updateUI();
+      });
+
+      toggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggle();
+      });
+
+      toggleBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle();
+        }
+      });
+    }
+
+    function updateUI() {
+      if (!toggleBtn) return;
+
+      if (isPlaying) {
+        toggleBtn.classList.add('is-playing');
+        toggleBtn.setAttribute('aria-pressed', 'true');
+        toggleBtn.setAttribute('aria-label', 'Pause background music: Coldplay - A Sky Full of Stars');
+        toggleBtn.setAttribute('title', 'Pause Coldplay — A Sky Full of Stars');
+      } else {
+        toggleBtn.classList.remove('is-playing');
+        toggleBtn.setAttribute('aria-pressed', 'false');
+        toggleBtn.setAttribute('aria-label', 'Play background music: Coldplay - A Sky Full of Stars');
+        toggleBtn.setAttribute('title', 'Play Coldplay — A Sky Full of Stars');
+      }
+    }
+
+    function play(isAutoTrigger = false) {
+      if (!audioElement) return;
+      if (isAutoTrigger && hasUserPaused) return;
+      if (!audioElement.paused) {
+        isPlaying = true;
+        updateUI();
+        return;
+      }
+
+      try {
+        const playPromise = audioElement.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              isPlaying = true;
+              hasUserPaused = false;
+              updateUI();
+              if (!isAutoTrigger) {
+                showToast('Playing: Coldplay — A Sky Full of Stars ✦');
+              }
+            })
+            .catch((err) => {
+              isPlaying = false;
+              updateUI();
+              if (err.name === 'NotAllowedError') {
+                console.log('Background music waiting for direct user gesture.');
+              } else if (!isAutoTrigger) {
+                showToast('Audio file not found: Place coldplay-sky-full-of-stars.mp3 in /audio');
+                console.warn('Background music playback blocked or missing file:', err.message);
+              }
+            });
+        }
+      } catch (err) {
+        isPlaying = false;
+        updateUI();
+        if (!isAutoTrigger) {
+          showToast('Audio file not found: Place coldplay-sky-full-of-stars.mp3 in /audio');
+        }
+      }
+    }
+
+    function pause() {
+      if (!audioElement) return;
+
+      try {
+        audioElement.pause();
+      } catch (_) {}
+
+      isPlaying = false;
+      hasUserPaused = true;
+      updateUI();
+      showToast('Background music paused');
+    }
+
+    function toggle() {
+      if (isPlaying) {
+        pause();
+      } else {
+        play(false);
+      }
+    }
+
+    function playOnInvitationOpen() {
+      if (!hasUserPaused && !isPlaying) {
+        play(true);
+      }
+    }
+
+    return {
+      init,
+      play,
+      pause,
+      toggle,
+      playOnInvitationOpen,
+      isPlaying: () => isPlaying
+    };
+  })();
 
   // ---------------------------------------------------------------------------
   // 3. Canvas Confetti System (Pure Vanilla JS)
@@ -211,9 +355,10 @@
 
     if (triggerConfetti) {
       launchConfetti(3200);
+      BackgroundMusic.play(false);
     }
 
-    // Focus on main content after curtain opens
+    // Focus on main content after entrance panels open
     setTimeout(() => {
       const homeHeading = document.querySelector('.hero-title');
       if (homeHeading) homeHeading.focus();
@@ -243,7 +388,10 @@
     }
 
     if (DOM.enterButton) {
-      DOM.enterButton.addEventListener('click', () => closeIntro(true));
+      DOM.enterButton.addEventListener('click', () => {
+        BackgroundMusic.play(false);
+        closeIntro(true);
+      });
     }
     if (DOM.skipIntroButton) {
       DOM.skipIntroButton.addEventListener('click', () => closeIntro(false));
@@ -646,213 +794,6 @@
   }
 
   // ---------------------------------------------------------------------------
-  // 12a. Envelope Sound Effects (Independent SFX Controller)
-  // ---------------------------------------------------------------------------
-  const EnvelopeAudio = (() => {
-    let audioContext = null;
-    let sfxMuted = false;
-    let isPlaying = false;
-    let audioElement = null;
-
-    // Retrieve user preference from localStorage
-    try {
-      const stored = localStorage.getItem('udbhav_envelope_sfx_muted');
-      if (stored !== null) {
-        sfxMuted = stored === 'true';
-      }
-    } catch (_) {}
-
-    // Respect reduced-motion preferences: default to muted if user prefers reduced motion
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      sfxMuted = true;
-    }
-
-    function init() {
-      audioElement = document.getElementById('envelopeAudio');
-      updateUI();
-
-      const toggleBtn = document.getElementById('sfxToggleBtn');
-      if (toggleBtn) {
-        toggleBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          toggleMute();
-        });
-      }
-    }
-
-    function updateUI() {
-      const toggleBtn = document.getElementById('sfxToggleBtn');
-      const btnText = document.getElementById('sfxBtnText');
-      const iconOn = document.querySelector('.sfx-svg-on');
-      const iconOff = document.querySelector('.sfx-svg-off');
-
-      if (!toggleBtn) return;
-
-      if (sfxMuted) {
-        toggleBtn.classList.add('is-muted');
-        toggleBtn.setAttribute('aria-pressed', 'false');
-        toggleBtn.setAttribute('aria-label', 'Envelope sound effects muted. Tap to enable sound effects.');
-        if (btnText) btnText.textContent = 'SOUND OFF';
-        if (iconOn) iconOn.style.display = 'none';
-        if (iconOff) iconOff.style.display = 'inline-block';
-      } else {
-        toggleBtn.classList.remove('is-muted');
-        toggleBtn.setAttribute('aria-pressed', 'true');
-        toggleBtn.setAttribute('aria-label', 'Envelope sound effects enabled. Tap to mute sound effects.');
-        if (btnText) btnText.textContent = 'SOUND ON';
-        if (iconOn) iconOn.style.display = 'inline-block';
-        if (iconOff) iconOff.style.display = 'none';
-      }
-    }
-
-    function toggleMute() {
-      sfxMuted = !sfxMuted;
-      try {
-        localStorage.setItem('udbhav_envelope_sfx_muted', String(sfxMuted));
-      } catch (_) {}
-      updateUI();
-      showToast(sfxMuted ? 'Sound effects muted' : 'Sound effects enabled ✦');
-    }
-
-    // Algorithmic Web Audio Synth Fallback (Exact 1.85s Sequence)
-    function playSynthesizedSequence() {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-
-        if (!audioContext) {
-          audioContext = new AudioCtx();
-        }
-        if (audioContext.state === 'suspended') {
-          audioContext.resume();
-        }
-
-        const now = audioContext.currentTime;
-
-        // Master Gain
-        const masterGain = audioContext.createGain();
-        masterGain.gain.setValueAtTime(0.65, now);
-        masterGain.connect(audioContext.destination);
-
-        // 1. Wax seal break / snap (0.0s - 0.25s)
-        const snapOsc = audioContext.createOscillator();
-        const snapGain = audioContext.createGain();
-        const snapFilter = audioContext.createBiquadFilter();
-
-        snapOsc.type = 'triangle';
-        snapOsc.frequency.setValueAtTime(280, now);
-        snapOsc.frequency.exponentialRampToValueAtTime(110, now + 0.18);
-
-        snapFilter.type = 'lowpass';
-        snapFilter.frequency.setValueAtTime(450, now);
-
-        snapGain.gain.setValueAtTime(0.48, now);
-        snapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-
-        snapOsc.connect(snapFilter);
-        snapFilter.connect(snapGain);
-        snapGain.connect(masterGain);
-
-        snapOsc.start(now);
-        snapOsc.stop(now + 0.25);
-
-        // 2. Paper rustling / flap glide (0.18s - 0.88s)
-        const bufferSize = Math.floor(audioContext.sampleRate * 0.7);
-        const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
-        const output = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < bufferSize; i++) {
-          output[i] = Math.random() * 2 - 1;
-        }
-
-        const whiteNoise = audioContext.createBufferSource();
-        whiteNoise.buffer = noiseBuffer;
-
-        const paperFilter = audioContext.createBiquadFilter();
-        paperFilter.type = 'bandpass';
-        paperFilter.Q.setValueAtTime(1.5, now + 0.18);
-        paperFilter.frequency.setValueAtTime(1100, now + 0.18);
-        paperFilter.frequency.linearRampToValueAtTime(1700, now + 0.45);
-        paperFilter.frequency.linearRampToValueAtTime(950, now + 0.85);
-
-        const paperGain = audioContext.createGain();
-        paperGain.gain.setValueAtTime(0.001, now + 0.18);
-        paperGain.gain.linearRampToValueAtTime(0.22, now + 0.42);
-        paperGain.gain.exponentialRampToValueAtTime(0.001, now + 0.88);
-
-        whiteNoise.connect(paperFilter);
-        paperFilter.connect(paperGain);
-        paperGain.connect(masterGain);
-
-        whiteNoise.start(now + 0.18);
-        whiteNoise.stop(now + 0.9);
-
-        // 3. Delicate golden chime (0.75s - 1.85s)
-        const chord = [1318.5, 1661.2, 1975.5, 2637.0]; // E6, G#6, B6, E7
-        chord.forEach((freq, idx) => {
-          const chimeOsc = audioContext.createOscillator();
-          const chimeGain = audioContext.createGain();
-
-          chimeOsc.type = 'sine';
-          chimeOsc.frequency.setValueAtTime(freq, now + 0.75);
-
-          const gainVal = 0.12 / (idx + 1);
-          chimeGain.gain.setValueAtTime(0.001, now + 0.75);
-          chimeGain.gain.linearRampToValueAtTime(gainVal, now + 0.77);
-          chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.85);
-
-          chimeOsc.connect(chimeGain);
-          chimeGain.connect(masterGain);
-
-          chimeOsc.start(now + 0.75);
-          chimeOsc.stop(now + 1.88);
-        });
-
-      } catch (err) {
-        console.warn('Web Audio synthesis error:', err);
-      }
-    }
-
-    function playOpeningSequence() {
-      if (sfxMuted) return;
-      if (isPlaying) return;
-
-      isPlaying = true;
-      setTimeout(() => {
-        isPlaying = false;
-      }, 2000);
-
-      // Try playing the preloaded audio asset first
-      if (audioElement) {
-        try {
-          audioElement.currentTime = 0;
-          const playPromise = audioElement.play();
-          if (playPromise !== undefined) {
-            playPromise.catch((err) => {
-              // If audio element playback is blocked, try synthesized fallback
-              console.log('Audio element play suppressed, falling back to Web Audio synth:', err.message);
-              playSynthesizedSequence();
-            });
-          }
-          return;
-        } catch (_) {
-          playSynthesizedSequence();
-          return;
-        }
-      }
-
-      // Fallback if no audio element
-      playSynthesizedSequence();
-    }
-
-    return {
-      init,
-      playOpeningSequence,
-      isMuted: () => sfxMuted,
-      toggleMute
-    };
-  })();
-
-  // ---------------------------------------------------------------------------
   // 12. Cinematic Interactive Envelope & Wax Seal Opening Experience
   // ---------------------------------------------------------------------------
   let isEnvelopeAnimating = false;
@@ -902,10 +843,6 @@
     const shouldOpen = open !== undefined ? open : !isCurrentlyExpanded;
 
     if (shouldOpen) {
-      if (!silent) {
-        EnvelopeAudio.playOpeningSequence();
-      }
-
       btn.classList.add('is-pressing');
       setTimeout(() => {
         btn.classList.remove('is-pressing');
@@ -922,6 +859,7 @@
         if (!silent) {
           launchConfetti(2400);
           showToast('Your invitation has been unsealed ✦');
+          BackgroundMusic.playOnInvitationOpen();
         }
 
         setTimeout(() => {
@@ -954,8 +892,6 @@
   }
 
   function initWaxSeal() {
-    EnvelopeAudio.init();
-
     if (DOM.waxSealBtn) {
       DOM.waxSealBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -1163,6 +1099,7 @@
   // ---------------------------------------------------------------------------
   function init() {
     initTheme();
+    BackgroundMusic.init();
     initIntro();
     initNavigation();
     initPosterLightbox();

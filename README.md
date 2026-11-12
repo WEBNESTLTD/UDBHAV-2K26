@@ -13,10 +13,10 @@ Built with love and devotion by the MCA seniors of **JSS Shri Manjunatheshwara M
    - Crisp SVG vector format embedded in the intro, navbar, admission pass, and footer hallmark, plus scalable SVG favicon.
 
 2. **Cinematic 3–5 Second Entrance Experience**:
-   - Theatrical curtain-parting reveal with animated gold emblem, Roman date (`SATURDAY · XIV · XI · MMXXVI`), ornamental corner fleurons (`⚜`), and gold-seal **ENTER THE CELEBRATION** CTA.
+   - Theatrical panel-parting reveal with animated gold emblem, Roman date (`SATURDAY · XIV · XI · MMXXVI`), ornamental corner fleurons (`⚜`), and gold-seal **ENTER THE CELEBRATION** CTA.
    - Smooth `sessionStorage` recall so returning guests enter instantly, with a keyboard-accessible "Direct Access (Skip Intro)" option and "Replay Opening Ceremony" footer trigger.
 
-3. **Luxury Editorial Event Poster Hero**:
+3. **Cinematic Editorial Event Poster Hero**:
    - Dramatic Roman typography (`Cinzel` headings, `Cormorant Garamond` editorial script, `Poppins` body text).
    - Double hairline ornamental borders, corner fleurons, and Roman numeral metadata (`I. DATE`, `II. TIME`, `III. VENUE`).
    - Hardware-accelerated canvas particle system simulating floating golden dust and embers (battery-conscious and throttled with `IntersectionObserver`).
@@ -27,12 +27,12 @@ Built with love and devotion by the MCA seniors of **JSS Shri Manjunatheshwara M
    - Accompanied by golden confetti burst upon unsealing.
 
 5. **Editorial Timeline of Programme (Acts I–V)**:
-   - Structured like a five-act celebration play rather than generic landing page cards:
-     - **Act I**: Fun Activities & Warm Connections (Icebreakers)
-     - **Act II**: Music & High-Octane DJ Sessions (Sonic Energy)
-     - **Act III**: Cultural Showcases & Dramatic Arts (Stage & Expression)
-     - **Act IV**: Games & Interactive Stage Showdowns (Friendly Rivalry)
-     - **Act V**: Exciting Prizes & Freshers Titles (Honors & Recognitions)
+   - Structured like a five-act celebration play with elegant concise descriptions:
+     - **Act I — Fun Activities & Warm Connections**: "Meet, mingle and make new friends."
+     - **Act II — Music & DJ**: "Feel the rhythm and enjoy the beats."
+     - **Act III — Cultural Performances**: "Celebrate talent, creativity and expression."
+     - **Act IV — Games & Events**: "Join the fun and enjoy friendly challenges."
+     - **Act V — Exciting Prizes & Freshers Titles**: "Celebrate achievements and unforgettable moments."
 
 6. **Refined Countdown Presentation**:
    - Target: **14 November 2026, 12:00 PM IST** (`2026-11-14T12:00:00+05:30`).
@@ -57,6 +57,12 @@ Built with love and devotion by the MCA seniors of **JSS Shri Manjunatheshwara M
     - Hallmark emblem with ancient Vedic blessing: *“Tamaso Ma Jyotirgamaya · Lead us from darkness unto light”*.
     - Moving invitation pledge: *“Here begins your story. Welcome to the family of JSS MCA Dharwad.”*
 
+11. **Background Music Experience (Coldplay — A Sky Full of Stars)**:
+    - Minimalist music control in navigation bar with gentle animated soundwave equalizer during playback.
+    - User-initiated playback: plays on explicit toggle click or when unsealing the invitation letter.
+    - Zero autoplay on page load; seamless looping, graceful missing-file handling without JavaScript errors.
+    - Audio file location: `audio/coldplay-sky-full-of-stars.mp3` (or `audio/background-music.mp3`).
+
 ---
 
 ## ✦ Design Constraints & Specifications
@@ -74,6 +80,8 @@ Built with love and devotion by the MCA seniors of **JSS Shri Manjunatheshwara M
 
 ```text
 UDBHAV-2K26/
+├── audio/                   # Directory for legally obtained background music asset
+│   └── coldplay-sky-full-of-stars.mp3 # Coldplay — A Sky Full of Stars (place legal MP3 here)
 ├── css/
 │   └── style.css            # Modular, responsive stylesheet with CSS custom properties
 ├── images/
@@ -82,7 +90,7 @@ UDBHAV-2K26/
 │   ├── udbhav-symbol.svg    # Compact vector emblem
 │   └── udbhav-poster.jpg    # Authentic high-resolution event poster (1440x1920)
 ├── js/
-│   └── main.js              # Accessible modular application logic & timer
+│   └── main.js              # Accessible modular application logic, audio & timer
 ├── index.html               # Semantic HTML5 document with Schema.org Event metadata
 └── README.md                # Project documentation
 ```
