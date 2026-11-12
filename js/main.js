@@ -48,6 +48,9 @@
     toastText: document.getElementById('toastText'),
     waxSealBtn: document.getElementById('waxSealBtn'),
     waxSealWrapper: document.getElementById('waxSealWrapper'),
+    waxSealTip: document.getElementById('waxSealTip'),
+    resealBtn: document.getElementById('resealBtn'),
+    sealParticles: document.getElementById('sealParticles'),
     invitationParchment: document.getElementById('invitationParchment'),
     envelopeContainer: document.querySelector('.envelope-container'),
     particleCanvas: document.getElementById('particleCanvas'),
@@ -643,37 +646,129 @@
   }
 
   // ---------------------------------------------------------------------------
-  // 12. Golden Wax Seal Invitation Card Opening Effect
+  // 12. Cinematic Interactive Envelope & Wax Seal Opening Experience
   // ---------------------------------------------------------------------------
-  function unsealInvitation(silent = false) {
+  let isEnvelopeAnimating = false;
+
+  function burstGoldSealParticles() {
+    const container = DOM.sealParticles || document.getElementById('sealParticles');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const count = 22;
+    const colors = ['#fffbf0', '#f7e1a9', '#d4af37', '#aa8228', '#ffffff'];
+
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('span');
+      p.className = 'seal-particle';
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.6;
+      const distance = 35 + Math.random() * 55;
+      const size = 3 + Math.random() * 3.5;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const duration = 500 + Math.random() * 350;
+
+      p.style.setProperty('--tx', `${Math.cos(angle) * distance}px`);
+      p.style.setProperty('--ty', `${Math.sin(angle) * distance}px`);
+      p.style.width = `${size}px`;
+      p.style.height = `${size}px`;
+      p.style.backgroundColor = color;
+      p.style.animationDuration = `${duration}ms`;
+
+      container.appendChild(p);
+    }
+
+    setTimeout(() => {
+      container.innerHTML = '';
+    }, 900);
+  }
+
+  function toggleInvitation(open, silent = false) {
     const btn = DOM.waxSealBtn;
     const container = DOM.envelopeContainer;
+    const tip = DOM.waxSealTip || (btn ? btn.querySelector('.wax-seal-tip') : null);
     if (!btn || !container) return;
 
-    const isExpanded = btn.getAttribute('aria-expanded') === 'true';
-    if (!isExpanded) {
-      btn.setAttribute('aria-expanded', 'true');
-      container.classList.add('is-unsealed');
-      const tip = btn.querySelector('.wax-seal-tip');
-      if (tip) tip.textContent = 'GOLDEN SEAL UNSEALED ✦ TAP TO RE-SEAL';
-      if (!silent) {
-        launchConfetti(2600);
-        showToast('Invitation letter unsealed ✦');
-      }
+    if (isEnvelopeAnimating) return;
+    isEnvelopeAnimating = true;
+
+    const isCurrentlyExpanded = btn.getAttribute('aria-expanded') === 'true';
+    const shouldOpen = open !== undefined ? open : !isCurrentlyExpanded;
+
+    if (shouldOpen) {
+      btn.classList.add('is-pressing');
+      setTimeout(() => {
+        btn.classList.remove('is-pressing');
+        btn.classList.add('has-cracked');
+        burstGoldSealParticles();
+      }, 140);
+
+      setTimeout(() => {
+        btn.setAttribute('aria-expanded', 'true');
+        btn.setAttribute('aria-label', 'Invitation letter is open. Tap to fold and reseal invitation');
+        container.classList.add('is-unsealed');
+        if (tip) tip.textContent = 'INVITATION OPEN · TAP TO RESEAL';
+
+        if (!silent) {
+          launchConfetti(2400);
+          showToast('Your invitation has been unsealed ✦');
+        }
+
+        setTimeout(() => {
+          isEnvelopeAnimating = false;
+        }, 700);
+      }, 260);
     } else {
       btn.setAttribute('aria-expanded', 'false');
+      btn.setAttribute('aria-label', 'Open your invitation letter from seniors');
       container.classList.remove('is-unsealed');
-      const tip = btn.querySelector('.wax-seal-tip');
-      if (tip) tip.textContent = 'TAP TO UNSEAL LETTER';
+      if (tip) tip.textContent = 'TAP TO OPEN YOUR INVITATION';
+
+      setTimeout(() => {
+        btn.classList.remove('has-cracked');
+        isEnvelopeAnimating = false;
+      }, 700);
+
       if (!silent) {
-        showToast('Invitation letter re-sealed');
+        showToast('Invitation folded and resealed ✦');
       }
     }
   }
 
+  function unsealInvitation(silent = false) {
+    toggleInvitation(true, silent);
+  }
+
+  function resealInvitation(silent = false) {
+    toggleInvitation(false, silent);
+  }
+
   function initWaxSeal() {
     if (DOM.waxSealBtn) {
-      DOM.waxSealBtn.addEventListener('click', () => unsealInvitation(false));
+      DOM.waxSealBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleInvitation(undefined, false);
+      });
+
+      DOM.waxSealBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleInvitation(undefined, false);
+        }
+      });
+    }
+
+    if (DOM.resealBtn) {
+      DOM.resealBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        resealInvitation(false);
+      });
+
+      DOM.resealBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          resealInvitation(false);
+        }
+      });
     }
 
     // Auto-unseal when user clicks the hero "UNSEAL YOUR INVITATION" button
@@ -684,7 +779,7 @@
           if (DOM.waxSealBtn && DOM.waxSealBtn.getAttribute('aria-expanded') !== 'true') {
             unsealInvitation(false);
           }
-        }, 450);
+        }, 500);
       });
     }
   }

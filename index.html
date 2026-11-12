@@ -363,43 +363,180 @@
         </div>
 
         <!-- The Invitation Envelope / Letter Component -->
-        <div class="envelope-container reveal">
-          <!-- Interactive Wax Seal -->
-          <div class="wax-seal-wrapper" id="waxSealWrapper">
-            <button class="wax-seal-btn" id="waxSealBtn" type="button" aria-expanded="false" aria-controls="invitationParchment" aria-label="Break gold wax seal to read invitation letter">
-              <span class="wax-seal-ring"></span>
-              <span class="wax-seal-crack" aria-hidden="true"></span>
-              <span class="wax-seal-monogram shimmer-gold">U</span>
-              <span class="wax-seal-stars">✦ ✦ ✦</span>
-              <span class="wax-seal-tip">TAP TO UNSEAL LETTER</span>
-            </button>
-          </div>
+        <div class="envelope-container reveal" id="envelopeContainer">
+          <!-- Ornamental Corner Fleurons for Burgundy Showcase Frame -->
+          <span class="envelope-corner corner-tl" aria-hidden="true">⚜</span>
+          <span class="envelope-corner corner-tr" aria-hidden="true">⚜</span>
+          <span class="envelope-corner corner-bl" aria-hidden="true">⚜</span>
+          <span class="envelope-corner corner-br" aria-hidden="true">⚜</span>
 
-          <!-- Unrolled Classic Calligraphy Parchment -->
-          <article class="invitation-parchment" id="invitationParchment" role="region" aria-label="Invitation Letter Content">
-            <div class="parchment-watermark" aria-hidden="true">U</div>
-            <div class="parchment-header">
-              <span class="parchment-crest">⚜</span>
-              <p class="parchment-salutation">DEAR JUNIORS,</p>
-            </div>
+          <!-- Interactive Envelope Stage -->
+          <div class="envelope-stage" id="envelopeStage">
+            <!-- Closed/Open Ivory Envelope Structure -->
+            <div class="envelope-body" id="envelopeBody">
+              <!-- Envelope Back / Interior Lining -->
+              <div class="envelope-back" aria-hidden="true">
+                <div class="envelope-inner-lining">
+                  <div class="lining-pattern"></div>
+                </div>
+              </div>
 
-            <div class="parchment-body">
-              <p>College is far more than lecture halls, assignments and examination schedules. It is about the bonds you forge, the creative sparks you ignite, and the memories that will stay with you long after the final semester.</p>
-              <p>To our newest members — consider this your official, warmest induction into the JSS MCA family. Come as you are, bring your brightest smiles, and prepare for an afternoon filled with electrifying music, genuine laughter, inspiring talent showcases, and unforgettable beginnings.</p>
-            </div>
+              <!-- 3D Folding Top Flap -->
+              <div class="envelope-flap" id="envelopeFlap" aria-hidden="true">
+                <div class="flap-face flap-front">
+                  <svg class="flap-geom" viewBox="0 0 800 280" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="flapIvory" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#fffdf8"/>
+                        <stop offset="40%" stop-color="#f7f1e1"/>
+                        <stop offset="100%" stop-color="#ebdcc1"/>
+                      </linearGradient>
+                      <linearGradient id="flapGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#d4af37"/>
+                        <stop offset="50%" stop-color="#f5e1a4"/>
+                        <stop offset="100%" stop-color="#997524"/>
+                      </linearGradient>
+                    </defs>
+                    <polygon points="0,0 800,0 400,270" fill="url(#flapIvory)" />
+                    <polyline points="0,0 400,268 800,0" fill="none" stroke="url(#flapGold)" stroke-width="2.5" />
+                    <polyline points="20,5 400,256 780,5" fill="none" stroke="url(#flapGold)" stroke-width="1" stroke-dasharray="3 3" opacity="0.65" />
+                  </svg>
+                </div>
+                <div class="flap-face flap-back">
+                  <svg class="flap-geom-back" viewBox="0 0 800 280" preserveAspectRatio="none">
+                    <polygon points="0,0 800,0 400,270" fill="#24070e" />
+                    <polyline points="0,0 400,268 800,0" fill="none" stroke="#d4af37" stroke-width="2" opacity="0.8" />
+                  </svg>
+                </div>
+              </div>
 
-            <div class="parchment-footer">
-              <p class="parchment-signoff">With excitement &amp; warmest wishes,</p>
-              <p class="parchment-signature">
-                <strong>Your Seniors</strong>
-                <span>· MCA Batch 2025–26</span>
-              </p>
-              <div class="parchment-seal-stamp" aria-hidden="true">
-                <span>SEALED &amp; DELIVERED</span>
-                <small>XIV · XI · MMXXVI</small>
+              <!-- Unfolded Ivory Letter (Calligraphy Parchment) -->
+              <article class="invitation-parchment" id="invitationParchment" role="region" aria-label="Official Invitation Letter Content" tabindex="-1">
+                <!-- Authentic Parchment Ornamental Frame & Gold Hairline Borders -->
+                <div class="parchment-frame-border" aria-hidden="true"></div>
+
+                <!-- Custom UDBHAV Phoenix Watermark behind text -->
+                <div class="parchment-watermark" aria-hidden="true">
+                  <svg viewBox="0 0 100 100" class="watermark-phoenix-svg">
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="1.8" opacity="0.4"/>
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 2" opacity="0.3"/>
+                    <polygon points="50,6 51.5,10 55,10.5 52,12.5 53,16 50,13.5 47,16 48,12.5 45,10.5 48.5,10" fill="currentColor"/>
+                    <path d="M32 28 L42 28 L40 58 C40 66 44 72 50 72 C56 72 60 66 60 58 L58 28 L68 28 L66 58 C66 71 58 80 50 80 C42 80 34 71 34 58 Z" fill="currentColor"/>
+                    <path d="M30 60 C38 52 50 42 66 34 C74 30 82 24 86 16 C83 23 78 28 72 32 C58 40 44 50 35 64 Z" fill="currentColor"/>
+                    <path d="M86 16 C90 14 94 13 96 16 C94 17 91 19 88 21 Z" fill="currentColor"/>
+                    <path d="M83 22 C87 19 91 19 94 21 C91 23 88 25 85 27 Z" fill="currentColor"/>
+                    <circle cx="50" cy="88" r="1.5" fill="currentColor"/>
+                  </svg>
+                </div>
+
+                <div class="parchment-content-flow">
+                  <!-- Step 1: Salutation revealed first -->
+                  <div class="parchment-header letter-reveal-step" data-step="1">
+                    <span class="parchment-crest" aria-hidden="true">⚜</span>
+                    <h3 class="parchment-salutation">DEAR JUNIORS,</h3>
+                    <div class="parchment-subcrest" aria-hidden="true">✦ ──────── ✦</div>
+                  </div>
+
+                  <!-- Step 2 & 3: Staggered Invitation Paragraphs -->
+                  <div class="parchment-body">
+                    <p class="letter-reveal-step" data-step="2">College is far more than lecture halls, assignments and examination schedules. It is about the bonds you forge, the creative sparks you ignite, and the memories that will stay with you long after the final semester.</p>
+                    <p class="letter-reveal-step" data-step="3">To our newest members — consider this your official, warmest induction into the JSS MCA family. Come as you are, bring your brightest smiles, and prepare for an afternoon filled with electrifying music, genuine laughter, inspiring talent showcases, and unforgettable beginnings.</p>
+                  </div>
+
+                  <!-- Step 4: Seniors' Signature & Sealed Stamp revealed last -->
+                  <div class="parchment-footer letter-reveal-step" data-step="4">
+                    <div class="parchment-signoff-wrap">
+                      <p class="parchment-signoff">With excitement &amp; warmest wishes,</p>
+                      <p class="parchment-signature">
+                        <strong>Your Seniors</strong>
+                        <span>· MCA Batch 2025–26</span>
+                      </p>
+                    </div>
+                    <div class="parchment-seal-stamp" aria-hidden="true">
+                      <div class="stamp-border">
+                        <span class="stamp-fleuron">✦ ⚜ ✦</span>
+                        <span class="stamp-title">SEALED &amp; DELIVERED</span>
+                        <small class="stamp-date">XIV · XI · MMXXVI</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 5: Replay / Reseal Button -->
+                  <div class="parchment-reseal-wrapper letter-reveal-step" data-step="5">
+                    <button class="reseal-letter-btn" id="resealBtn" type="button" aria-label="Fold and reseal the invitation letter">
+                      <span class="reseal-ornament" aria-hidden="true">✦</span>
+                      <span>FOLD &amp; RESEAL INVITATION</span>
+                      <span class="reseal-ornament" aria-hidden="true">✦</span>
+                    </button>
+                  </div>
+                </div>
+              </article>
+
+              <!-- Envelope Front Pocket (Lower Triangular Folds Over Base) -->
+              <div class="envelope-pocket" aria-hidden="true">
+                <svg class="pocket-geom" viewBox="0 0 800 360" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="pocketLeftGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#f5eee0"/>
+                      <stop offset="100%" stop-color="#e4d4ba"/>
+                    </linearGradient>
+                    <linearGradient id="pocketRightGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stop-color="#f5eee0"/>
+                      <stop offset="100%" stop-color="#dfcfb4"/>
+                    </linearGradient>
+                    <linearGradient id="pocketBottomGrad" x1="50%" y1="100%" x2="50%" y2="0%">
+                      <stop offset="0%" stop-color="#e9ddc7"/>
+                      <stop offset="100%" stop-color="#fbf7ef"/>
+                    </linearGradient>
+                    <linearGradient id="pocketGoldLine" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#d4af37"/>
+                      <stop offset="100%" stop-color="#997524"/>
+                    </linearGradient>
+                  </defs>
+                  <polygon points="0,0 400,195 0,360" fill="url(#pocketLeftGrad)" />
+                  <polygon points="800,0 400,195 800,360" fill="url(#pocketRightGrad)" />
+                  <polygon points="0,360 800,360 400,190" fill="url(#pocketBottomGrad)" />
+                  <line x1="0" y1="0" x2="400" y2="195" stroke="url(#pocketGoldLine)" stroke-width="1.8" />
+                  <line x1="800" y1="0" x2="400" y2="195" stroke="url(#pocketGoldLine)" stroke-width="1.8" />
+                  <line x1="0" y1="360" x2="400" y2="190" stroke="url(#pocketGoldLine)" stroke-width="1.2" opacity="0.6" />
+                  <line x1="800" y1="360" x2="400" y2="190" stroke="url(#pocketGoldLine)" stroke-width="1.2" opacity="0.6" />
+                </svg>
+              </div>
+
+              <!-- Interactive Burgundy Wax Seal Button with Custom Phoenix Emblem -->
+              <div class="wax-seal-wrapper" id="waxSealWrapper">
+                <button class="wax-seal-btn" id="waxSealBtn" type="button" aria-expanded="false" aria-controls="invitationParchment" aria-label="Open your invitation letter from seniors">
+                  <span class="wax-seal-body">
+                    <!-- Custom UDBHAV Phoenix Emblem in Gold Foil -->
+                    <svg class="wax-seal-phoenix" viewBox="0 0 100 100" aria-hidden="true">
+                      <defs>
+                        <linearGradient id="sealGoldFoil" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#fff9ea"/>
+                          <stop offset="35%" stop-color="#f7e2a9"/>
+                          <stop offset="70%" stop-color="#d8aa50"/>
+                          <stop offset="100%" stop-color="#a07424"/>
+                        </linearGradient>
+                      </defs>
+                      <circle cx="50" cy="50" r="45" fill="none" stroke="url(#sealGoldFoil)" stroke-width="2" opacity="0.9"/>
+                      <circle cx="50" cy="50" r="41" fill="none" stroke="url(#sealGoldFoil)" stroke-width="0.8" stroke-dasharray="2.5 2" opacity="0.65"/>
+                      <polygon points="50,7 51.5,11 55,11.5 52,13.5 53,17 50,14.5 47,17 48,13.5 45,11.5 48.5,11" fill="url(#sealGoldFoil)"/>
+                      <path d="M33 30 L43 30 L41 58 C41 65 45 71 50 71 C55 71 59 65 59 58 L57 30 L67 30 L65 58 C65 70 58 78 50 78 C42 78 35 70 35 58 Z" fill="url(#sealGoldFoil)"/>
+                      <path d="M31 60 C39 52 50 42 66 34 C74 30 82 24 86 16 C83 23 78 28 72 32 C58 40 44 50 35 64 Z" fill="url(#sealGoldFoil)"/>
+                      <path d="M86 16 C90 14 94 13 96 16 C94 17 91 19 88 21 Z" fill="url(#sealGoldFoil)"/>
+                      <path d="M83 22 C87 19 91 19 94 21 C91 23 88 25 85 27 Z" fill="url(#sealGoldFoil)"/>
+                      <circle cx="50" cy="87" r="1.8" fill="url(#sealGoldFoil)"/>
+                    </svg>
+                    <!-- Golden Fracture Crack on Unseal -->
+                    <span class="wax-seal-crack" aria-hidden="true"></span>
+                  </span>
+                  <span class="wax-seal-pulse" aria-hidden="true"></span>
+                  <span class="wax-seal-tip" id="waxSealTip">TAP TO OPEN YOUR INVITATION</span>
+                </button>
+                <!-- Gold particle burst container -->
+                <div class="seal-particle-emitter" id="sealParticles" aria-hidden="true"></div>
               </div>
             </div>
-          </article>
+          </div>
         </div>
 
         <div class="welcome-bottom" aria-hidden="true">
