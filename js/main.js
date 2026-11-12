@@ -646,6 +646,213 @@
   }
 
   // ---------------------------------------------------------------------------
+  // 12a. Envelope Sound Effects (Independent SFX Controller)
+  // ---------------------------------------------------------------------------
+  const EnvelopeAudio = (() => {
+    let audioContext = null;
+    let sfxMuted = false;
+    let isPlaying = false;
+    let audioElement = null;
+
+    // Retrieve user preference from localStorage
+    try {
+      const stored = localStorage.getItem('udbhav_envelope_sfx_muted');
+      if (stored !== null) {
+        sfxMuted = stored === 'true';
+      }
+    } catch (_) {}
+
+    // Respect reduced-motion preferences: default to muted if user prefers reduced motion
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      sfxMuted = true;
+    }
+
+    function init() {
+      audioElement = document.getElementById('envelopeAudio');
+      updateUI();
+
+      const toggleBtn = document.getElementById('sfxToggleBtn');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          toggleMute();
+        });
+      }
+    }
+
+    function updateUI() {
+      const toggleBtn = document.getElementById('sfxToggleBtn');
+      const btnText = document.getElementById('sfxBtnText');
+      const iconOn = document.querySelector('.sfx-svg-on');
+      const iconOff = document.querySelector('.sfx-svg-off');
+
+      if (!toggleBtn) return;
+
+      if (sfxMuted) {
+        toggleBtn.classList.add('is-muted');
+        toggleBtn.setAttribute('aria-pressed', 'false');
+        toggleBtn.setAttribute('aria-label', 'Envelope sound effects muted. Tap to enable sound effects.');
+        if (btnText) btnText.textContent = 'SOUND OFF';
+        if (iconOn) iconOn.style.display = 'none';
+        if (iconOff) iconOff.style.display = 'inline-block';
+      } else {
+        toggleBtn.classList.remove('is-muted');
+        toggleBtn.setAttribute('aria-pressed', 'true');
+        toggleBtn.setAttribute('aria-label', 'Envelope sound effects enabled. Tap to mute sound effects.');
+        if (btnText) btnText.textContent = 'SOUND ON';
+        if (iconOn) iconOn.style.display = 'inline-block';
+        if (iconOff) iconOff.style.display = 'none';
+      }
+    }
+
+    function toggleMute() {
+      sfxMuted = !sfxMuted;
+      try {
+        localStorage.setItem('udbhav_envelope_sfx_muted', String(sfxMuted));
+      } catch (_) {}
+      updateUI();
+      showToast(sfxMuted ? 'Sound effects muted' : 'Sound effects enabled ✦');
+    }
+
+    // Algorithmic Web Audio Synth Fallback (Exact 1.85s Sequence)
+    function playSynthesizedSequence() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+
+        if (!audioContext) {
+          audioContext = new AudioCtx();
+        }
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+
+        const now = audioContext.currentTime;
+
+        // Master Gain
+        const masterGain = audioContext.createGain();
+        masterGain.gain.setValueAtTime(0.65, now);
+        masterGain.connect(audioContext.destination);
+
+        // 1. Wax seal break / snap (0.0s - 0.25s)
+        const snapOsc = audioContext.createOscillator();
+        const snapGain = audioContext.createGain();
+        const snapFilter = audioContext.createBiquadFilter();
+
+        snapOsc.type = 'triangle';
+        snapOsc.frequency.setValueAtTime(280, now);
+        snapOsc.frequency.exponentialRampToValueAtTime(110, now + 0.18);
+
+        snapFilter.type = 'lowpass';
+        snapFilter.frequency.setValueAtTime(450, now);
+
+        snapGain.gain.setValueAtTime(0.48, now);
+        snapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+        snapOsc.connect(snapFilter);
+        snapFilter.connect(snapGain);
+        snapGain.connect(masterGain);
+
+        snapOsc.start(now);
+        snapOsc.stop(now + 0.25);
+
+        // 2. Paper rustling / flap glide (0.18s - 0.88s)
+        const bufferSize = Math.floor(audioContext.sampleRate * 0.7);
+        const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+
+        const whiteNoise = audioContext.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+
+        const paperFilter = audioContext.createBiquadFilter();
+        paperFilter.type = 'bandpass';
+        paperFilter.Q.setValueAtTime(1.5, now + 0.18);
+        paperFilter.frequency.setValueAtTime(1100, now + 0.18);
+        paperFilter.frequency.linearRampToValueAtTime(1700, now + 0.45);
+        paperFilter.frequency.linearRampToValueAtTime(950, now + 0.85);
+
+        const paperGain = audioContext.createGain();
+        paperGain.gain.setValueAtTime(0.001, now + 0.18);
+        paperGain.gain.linearRampToValueAtTime(0.22, now + 0.42);
+        paperGain.gain.exponentialRampToValueAtTime(0.001, now + 0.88);
+
+        whiteNoise.connect(paperFilter);
+        paperFilter.connect(paperGain);
+        paperGain.connect(masterGain);
+
+        whiteNoise.start(now + 0.18);
+        whiteNoise.stop(now + 0.9);
+
+        // 3. Delicate golden chime (0.75s - 1.85s)
+        const chord = [1318.5, 1661.2, 1975.5, 2637.0]; // E6, G#6, B6, E7
+        chord.forEach((freq, idx) => {
+          const chimeOsc = audioContext.createOscillator();
+          const chimeGain = audioContext.createGain();
+
+          chimeOsc.type = 'sine';
+          chimeOsc.frequency.setValueAtTime(freq, now + 0.75);
+
+          const gainVal = 0.12 / (idx + 1);
+          chimeGain.gain.setValueAtTime(0.001, now + 0.75);
+          chimeGain.gain.linearRampToValueAtTime(gainVal, now + 0.77);
+          chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.85);
+
+          chimeOsc.connect(chimeGain);
+          chimeGain.connect(masterGain);
+
+          chimeOsc.start(now + 0.75);
+          chimeOsc.stop(now + 1.88);
+        });
+
+      } catch (err) {
+        console.warn('Web Audio synthesis error:', err);
+      }
+    }
+
+    function playOpeningSequence() {
+      if (sfxMuted) return;
+      if (isPlaying) return;
+
+      isPlaying = true;
+      setTimeout(() => {
+        isPlaying = false;
+      }, 2000);
+
+      // Try playing the preloaded audio asset first
+      if (audioElement) {
+        try {
+          audioElement.currentTime = 0;
+          const playPromise = audioElement.play();
+          if (playPromise !== undefined) {
+            playPromise.catch((err) => {
+              // If audio element playback is blocked, try synthesized fallback
+              console.log('Audio element play suppressed, falling back to Web Audio synth:', err.message);
+              playSynthesizedSequence();
+            });
+          }
+          return;
+        } catch (_) {
+          playSynthesizedSequence();
+          return;
+        }
+      }
+
+      // Fallback if no audio element
+      playSynthesizedSequence();
+    }
+
+    return {
+      init,
+      playOpeningSequence,
+      isMuted: () => sfxMuted,
+      toggleMute
+    };
+  })();
+
+  // ---------------------------------------------------------------------------
   // 12. Cinematic Interactive Envelope & Wax Seal Opening Experience
   // ---------------------------------------------------------------------------
   let isEnvelopeAnimating = false;
@@ -695,6 +902,10 @@
     const shouldOpen = open !== undefined ? open : !isCurrentlyExpanded;
 
     if (shouldOpen) {
+      if (!silent) {
+        EnvelopeAudio.playOpeningSequence();
+      }
+
       btn.classList.add('is-pressing');
       setTimeout(() => {
         btn.classList.remove('is-pressing');
@@ -743,6 +954,8 @@
   }
 
   function initWaxSeal() {
+    EnvelopeAudio.init();
+
     if (DOM.waxSealBtn) {
       DOM.waxSealBtn.addEventListener('click', (e) => {
         e.preventDefault();

@@ -1113,6 +1113,63 @@ body.light-theme .scroll-cue {
 /* --------------------------------------------------------------------------
    07. Section 01: Cinematic Interactive Envelope & Unfolding Parchment
    -------------------------------------------------------------------------- */
+.section-label-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.section-label-bar .section-label {
+  margin-bottom: 0;
+}
+
+/* Sound Effect Toggle Button */
+.sfx-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(36, 9, 18, 0.65);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 20px;
+  padding: 5px 13px;
+  color: var(--gold-light);
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: all var(--transition-fast);
+}
+
+.sfx-toggle-btn:hover,
+.sfx-toggle-btn:focus-visible {
+  border-color: var(--gold-primary);
+  background: rgba(56, 12, 26, 0.85);
+  box-shadow: 0 0 14px rgba(212, 175, 55, 0.35);
+  transform: translateY(-1px);
+}
+
+.sfx-toggle-btn.is-muted {
+  opacity: 0.65;
+  border-color: rgba(180, 140, 70, 0.25);
+  color: var(--text-dim);
+}
+
+.sfx-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-primary);
+  line-height: 1;
+}
+
+.sfx-toggle-btn.is-muted .sfx-icon-wrap {
+  color: var(--text-dim);
+}
+
 .envelope-container {
   max-width: 880px;
   margin: 0 auto;
