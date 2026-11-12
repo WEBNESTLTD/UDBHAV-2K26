@@ -1406,7 +1406,7 @@ body.light-theme .wax-seal-tip {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 24px;
+  padding-top: 34px;
   z-index: 2;
 }
 
@@ -1489,6 +1489,10 @@ body.light-theme .act-roman {
   color: var(--text-secondary);
   line-height: 1.8;
   margin-bottom: 20px;
+}
+
+.act-card .act-desc:last-child {
+  margin-bottom: 0;
 }
 
 .act-footer {
